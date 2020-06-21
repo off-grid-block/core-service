@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/off-grid-block/deon-library/sdk"
+	"github.com/off-grid-block/core-interface/pkg/sdk"
 	// ipfs "github.com/ipfs/go-ipfs-api"
 )
 

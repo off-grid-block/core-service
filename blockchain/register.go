@@ -4,7 +4,7 @@ import (
 	caMsp "github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 	"github.com/pkg/errors"
 	//"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
-	"github.com/off-grid-block/deon-library/sdk"
+	"github.com/off-grid-block/core-interface/pkg/sdk"
 	"fmt"
 )
 
@@ -16,7 +16,7 @@ func RegUser(s *sdk.SDKConfig, data caMsp.RegistrationRequest) (string, error) {
 	args = append(args, "invoke")
 	// new User information
 
-	caClient, err := caMsp.New(s.fsdk.Context())
+	caClient, err := caMsp.New(s.FabricSDK.Context())
 	fmt.Println("caclient", caClient)
 	enrollSecret, err := caClient.Register(&data)
 	fmt.Println("enrollSecret", enrollSecret)

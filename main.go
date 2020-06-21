@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"log"
 	"time"
-	"github.com/off-grid-block/core-service/blockchain"
-	"github.com/off-grid-block/deon-library/sdk"
+	// "github.com/off-grid-block/core-service/blockchain"
+	"github.com/off-grid-block/core-interface/pkg/sdk"
 	// "github.com/pkg/errors"
 	"fmt"
 )
@@ -29,6 +29,12 @@ func main() {
 	voteApp, err := vote.SetupApp(fabricSDK)
 	if err != nil {
 		fmt.Errorf("Failed to set up voting app: %v", err)
+		return
+	}
+
+	err = fabricSDK.ChainCodeInstallationInstantiation()
+	if err != nil {
+		fmt.Errorf("Failed to install & instantiate chaincode: %v", err)
 		return
 	}
 
@@ -101,7 +107,7 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	fmt.Println("Listening on %s...", srv.Addr)
+	fmt.Printf("Listening on %v...\n", srv.Addr)
 	log.Fatal(srv.ListenAndServe())
 
 }
