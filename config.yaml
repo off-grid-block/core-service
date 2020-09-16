@@ -65,7 +65,7 @@ client:
 
   # Root of the MSP directories with keys and certs.
   cryptoconfig:
-    path: /Users/brianli/deon/fabric-samples/first-network/crypto-config
+    path: /config/crypto-config
 
   # Some SDKs support pluggable KV stores, the properties under "credentialStore"
   # are implementation specific
@@ -268,8 +268,8 @@ organizations:
     # runtime network. Fabric-CA is a special certificate authority that provides a REST APIs for
     # dynamic certificate management (enroll, revoke, re-enroll). The following section is only for
     # Fabric-CA servers.
-    certificateAuthorities:
-      - ca.org1.example.com
+    # certificateAuthorities:
+    #   - ca.org1.example.com
 
   # the profile will contain public information about organizations other than the one it belongs to.
   # These are necessary information to make transaction lifecycles work, including MSP IDs and
@@ -286,8 +286,8 @@ organizations:
       - peer0.org2.example.com
       - peer1.org2.example.com
 
-    certificateAuthorities:
-      - ca.org2.example.com
+    # certificateAuthorities:
+    #   - ca.org2.example.com
 
   # Orderer Org name
   ordererorg:
@@ -306,7 +306,7 @@ organizations:
 orderers:
   orderer.example.com:
     # [Optional] Default: Infer from hostname
-    url: localhost:7050
+    url: orderer.example.com:7050
 
     # these are standard properties defined by the gRPC library
     # they will be passed in as-is to gRPC client constructor
@@ -324,7 +324,7 @@ orderers:
 
     tlsCACerts:
       # Certificate location absolute path
-      path: /Users/brianli/deon/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
+      path: /config/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
       #path: first-network/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
 
 
@@ -335,7 +335,7 @@ peers:
   peer0.org1.example.com:
     # this URL is used to send endorsement and query requests
     # [Optional] Default: Infer from hostname
-    url: localhost:7051
+    url: peer0.org1.example.com:7051
 
     grpcOptions:
       ssl-target-name-override: peer0.org1.example.com
@@ -351,12 +351,12 @@ peers:
 
     tlsCACerts:
       # Certificate location absolute path
-      path: /Users/brianli/deon/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
+      path: /config/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
       #path: first-network/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
 
   peer1.org1.example.com:
     # this URL is used to send endorsement and query requests
-    url: localhost:8051
+    url: peer1.org1.example.com:8051
 
     grpcOptions:
       ssl-target-name-override: peer1.org1.example.com
@@ -372,12 +372,12 @@ peers:
 
     tlsCACerts:
       # Certificate location absolute path
-      path: /Users/brianli/deon/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
+      path: /config/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
       #path: first-network/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
 
   peer0.org2.example.com:
     # this URL is used to send endorsement and query requests
-    url: localhost:9051
+    url: peer0.org2.example.com:9051
     grpcOptions:
       ssl-target-name-override: peer0.org2.example.com
       # These parameters should be set in coordination with the keepalive policy on the server,
@@ -391,11 +391,11 @@ peers:
       allow-insecure: false
 
     tlsCACerts:
-      path: /Users/brianli/deon/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem
+      path: /config/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem
 
   peer1.org2.example.com:
     # this URL is used to send endorsement and query requests
-    url: localhost:10051
+    url: peer1.org2.example.com:10051
     grpcOptions:
       ssl-target-name-override: peer1.org2.example.com
       # These parameters should be set in coordination with the keepalive policy on the server,
@@ -409,7 +409,7 @@ peers:
       allow-insecure: false
 
     tlsCACerts:
-      path: /Users/brianli/deon/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem
+      path: /config/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem
 
 #
 # Fabric-CA is a special kind of Certificate Authority provided by Hyperledger Fabric which allows
@@ -419,7 +419,7 @@ peers:
 # certificateAuthorities:
 #   ca.org1.example.com:
 #     # [Optional] Default: Infer from hostname
-#     url: localhost:7054
+#     url: https://ca.org1.example.com:7054
 #     tlsCACerts:
 #       # Comma-Separated list of paths
 #       path: /Users/brianli/deon/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
@@ -440,9 +440,8 @@ peers:
 #       enrollSecret: adminpw
 #     # [Optional] The optional name of the CA.
 #     caName: ca.org1.example.com
-
 #   ca.org2.example.com:
-#     url: localhost:8054
+#     url: https://ca.org2.example.com:8054
 #     tlsCACerts:
 #       # Comma-Separated list of paths
 #       path: /Users/brianli/deon/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem
@@ -464,58 +463,3 @@ peers:
 #       enrollSecret: adminpw
 #     # [Optional] The optional name of the CA.
 #     caName: ca.org2.example.com
-
-certificateAuthorities:
-  ca.org1.example.com:
-    url: 10.53.17.232:8005
-    # Fabric-CA supports dynamic user enrollment via REST APIs. A "root" user, a.k.a registrar, is
-    # needed to enroll and invoke new users.
-    httpOptions:
-      verify: false
-    registrar:
-      enrollId: admin
-      enrollSecret: adminpw
-    # [Optional] The optional name of the CA.
-    caName: ca.org1.example.com
-    tlsCACerts:
-      # Certificate location absolute path
-      # path: ${GOPATH}/src/github.com/gosdk-example/fixtures/crypto-config/peerOrganizations/org1.hf.sample.io/ca/ca.org1.hf.sample.io-cert.pem
-      path: /Users/brianli/deon/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
-
-
-# EntityMatchers enable substitution of network hostnames with static configurations
- # so that properties can be mapped. Regex can be used for this purpose
-# UrlSubstitutionExp can be empty which means the same network hostname will be used
-# UrlSubstitutionExp can be given same as mapped peer url, so that mapped peer url can be used
-# UrlSubstitutionExp can have golang regex matchers like ${1}.local.example.${2}:${3} for pattern
- # like peer0.org1.example.com:1234 which converts peer0.org1.example.com to peer0.org1.local.example.com:1234
-# sslTargetOverrideUrlSubstitutionExp follow in the same lines as
- # SubstitutionExp for the fields gprcOptions.ssl-target-name-override respectively
-# In any case mappedHost's config will be used, so mapped host cannot be empty, if entityMatchers are used
-#entityMatchers:
-entityMatchers:
-  peer:
-    - pattern: (\w+).org1.example.com:(\d+)
-      urlSubstitutionExp: localhost:${2}
-      sslTargetOverrideUrlSubstitutionExp: ${1}.org1.example.com
-      mappedHost: ${1}.org1.example.com
-
-    - pattern: (\w+).org2.example.com:(\d+)
-      urlSubstitutionExp: localhost:${2}
-      sslTargetOverrideUrlSubstitutionExp: ${1}.org2.example.com
-      mappedHost: ${1}.org2.example.com
-
-  orderer:
-    - pattern: (\w+).example.(\w+)
-      urlSubstitutionExp: localhost:7050
-      sslTargetOverrideUrlSubstitutionExp: orderer.example.com
-      mappedHost: orderer.example.com
-#
- # certificateAuthority:
- #   - pattern: (\w+).org1.example.com:(\d+)
- #     urlSubstitutionExp: localhost:${2}
- #     mappedHost: ${1}.ca.org1.example.com
-
- #   - pattern: (\w+).org2.example.(\w+)
- #     urlSubstitutionExp:
- #     mappedHost: ca.org2.example.com

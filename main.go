@@ -13,14 +13,20 @@ import (
 	"fmt"
 )
 
+// Homepage
+func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Homepage\n"))
+}
 
 func main() {
 
 	// Initialize SDK
 	fabricSDK, err := sdk.SetupSDK()
 	if err != nil {
-		fmt.Errorf("Failed to set up and initialize SDK: %v", err)
+		fmt.Printf("Failed to set up and initialize SDK: %v\n", err)
 	}
+
+	defer fabricSDK.CloseSDK()
 
 	// set up admin app
 	adminApp := web.SetupApp(fabricSDK)
@@ -28,19 +34,22 @@ func main() {
 	// set up vote app
 	voteApp, err := vote.SetupApp(fabricSDK)
 	if err != nil {
-		fmt.Errorf("Failed to set up voting app: %v", err)
+		fmt.Printf("Failed to set up voting app: %v", err)
 		return
 	}
 
-	err = fabricSDK.ChainCodeInstallationInstantiation()
-	if err != nil {
-		fmt.Errorf("Failed to install & instantiate chaincode: %v", err)
-		return
-	}
+	// err = fabricSDK.ChainCodeInstallationInstantiation()
+	// if err != nil {
+	// 	fmt.Printf("Failed to install & instantiate chaincode: %v", err)
+	// 	return
+	// }
 
 	// create router object
 	r := mux.NewRouter()
 	api := r.PathPrefix("/api/v1").Subrouter()
+
+	// test api homepage
+	api.HandleFunc("/", HomeHandler)
 
 	/********************************/
 	/* identity management endpoint */
@@ -102,7 +111,7 @@ func main() {
 	// Start http server
 	srv := &http.Server{
 		Handler: 	r,
-		Addr:		"127.0.0.1:8000",
+		Addr:		"0.0.0.0:8000",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
