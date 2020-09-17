@@ -2,121 +2,62 @@ package main
 
 import (
 	"github.com/off-grid-block/core-service/web"
-	"github.com/off-grid-block/vote"
-	"github.com/gorilla/mux"
-	"net/http"
-	"log"
-	"time"
-	// "github.com/off-grid-block/core-service/blockchain"
-	"github.com/off-grid-block/core-interface/pkg/sdk"
+	"github.com/off-grid-block/core-service/blockchain"
 	// "github.com/pkg/errors"
+	ipfs "github.com/ipfs/go-ipfs-api"
 	"fmt"
+	"os"
 )
-
-// Homepage
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Homepage\n"))
-}
 
 func main() {
 
-	// Initialize SDK
-	fabricSDK, err := sdk.SetupSDK()
-	if err != nil {
-		fmt.Printf("Failed to set up and initialize SDK: %v\n", err)
+	fSetup := blockchain.SetupSDK {
+		OrdererID: 			"orderer.example.com",
+		ChannelID: 			"mychannel",
+		ChannelConfig:		os.Getenv("CHANNEL_CONFIG"),
+		ChaincodeGoPath:	os.Getenv("CHAINCODE_GOPATH"),
+		ChaincodePath:		make(map[string]string),
+		OrgAdmin:			"Admin",
+		OrgName:			"org1",
+		ConfigFile:			"/src/config.yaml",
+		UserName:			"User1",
 	}
 
-	defer fabricSDK.CloseSDK()
-
-	// set up admin app
-	adminApp := web.SetupApp(fabricSDK)
-
-	// set up vote app
-	voteApp, err := vote.SetupApp(fabricSDK)
+	err := fSetup.Initialization()
 	if err != nil {
-		fmt.Printf("Failed to set up voting app: %v", err)
+		fmt.Printf("Unable to initialize the Fabric SDK: %v\n", err)
 		return
 	}
 
-	// err = fabricSDK.ChainCodeInstallationInstantiation()
-	// if err != nil {
-	// 	fmt.Printf("Failed to install & instantiate chaincode: %v", err)
-	// 	return
-	// }
+	// Close SDK
+	defer fSetup.CloseSDK()
 
-	// create router object
-	r := mux.NewRouter()
-	api := r.PathPrefix("/api/v1").Subrouter()
-
-	// test api homepage
-	api.HandleFunc("/", HomeHandler)
-
-	/********************************/
-	/* identity management endpoint */
-	/********************************/
-	api.HandleFunc("/application", adminApp.UserHandler).Methods("POST")
-
-	/*********************************/
-	/*	subrouter for "poll" prefix  */
-	/*********************************/
-	poll := api.PathPrefix("/poll").Subrouter()
-
-	// handler for initPoll
-	poll.HandleFunc("", voteApp.InitPollHandler).Methods("POST")
-
-	// handler for queryAllPolls
-	poll.HandleFunc("", voteApp.QueryAllPollsHandler).Methods("GET")
-
-	// handler for updatePollStatus
-	poll.HandleFunc("/{pollid}/status", voteApp.UpdatePollStatusHandler).Methods("PUT")
-
-	// handler for getPoll
-	poll.HandleFunc("/{pollid}", voteApp.GetPollHandler).Methods("GET")
-
-	// // handler for getPollPrivateDetails
-	// poll.HandleFunc("/{pollid}/private", voteApp.getPollPrivateDetailsHandler).Methods("GET")
-
-	/*********************************/
-	/*	subrouter for "vote" prefix  */
-	/*********************************/
-	vote := api.PathPrefix("/vote").Subrouter()
-
-	// handler for initVote
-	vote.HandleFunc("", voteApp.InitVoteHandler).Methods("POST")
-
-	// // handler for getVotePrivateDetails
-	// vote.HandleFunc("/{pollid}/{voterid}/private", voteApp.getVotePrivateDetailsHandler).Methods("GET")
-
-	// // handler for getVotePrivateDetailsHash
-	// vote.HandleFunc("/{pollid}/{voterid}/hash", voteApp.getVotePrivateDetailsHashHandler).Methods("GET")
-
-	// handler for getVote
-	vote.HandleFunc("/{pollid}/{voterid}", voteApp.GetVoteHandler).Methods("GET")
-
-	// handler for queryVotePrivateDetailsByPoll
-	vote.HandleFunc("", voteApp.QueryVotePrivateDetailsByPollHandler).
-		Methods("GET").
-		Queries("type", "private", "pollid", "{pollid}")
-
-	// handler for queryVotesByPoll
-	vote.HandleFunc("", voteApp.QueryVotesByPollHandler).
-		Methods("GET").
-		Queries("type", "public", "pollid", "{pollid}")
-
-	// handler for getVotesByVoter
-	vote.HandleFunc("", voteApp.QueryVotesByVoterHandler).
-		Methods("GET").
-		Queries("voterid", "{voterid}")
-
-	// Start http server
-	srv := &http.Server{
-		Handler: 	r,
-		Addr:		"0.0.0.0:8000",
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
+	err = fSetup.AdminSetup()
+	if err != nil {
+		fmt.Printf("Failed to set up network admin: %v\n", err)
+		return
 	}
 
-	fmt.Printf("Listening on %v...\n", srv.Addr)
-	log.Fatal(srv.ListenAndServe())
+	err = fSetup.ChannelSetup()
+	if err != nil {
+		fmt.Printf("Failed to set up channel: %v\n", err)
+		return
+	}
+
+	err = fSetup.ClientSetup()
+	if err != nil {
+		fmt.Printf("Failed to set up client: %v\n", err)
+		return
+	}
+
+	// create shell to connect to IPFS
+	sh := ipfs.NewShell(os.Getenv("IPFS_ENDPOINT"))
+
+	app := &web.Application{
+		FabricSDK: &fSetup,
+		IpfsShell: sh,
+	}
+
+	web.Serve(app)
 
 }

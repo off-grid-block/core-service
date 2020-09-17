@@ -13,8 +13,8 @@ COPY . /src/
 # Get & install packages before building
 RUN go get
 # Compile source code (dependencies from go.mod also installed)
-RUN go build -o /bin/vote
-# CMD ["/bin/vote"]
+RUN go build -o /bin/start
+CMD ["/bin/start"]
 
 # ### Stage 2: Move executable ###
 # FROM scratch
