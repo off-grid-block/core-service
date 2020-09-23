@@ -5,7 +5,7 @@ services:
   deon:
     image: deon/core-service:latest
     container_name: deon.example.com
-    build: ./core-service
+    build: .
     ports:
       - "8001:8001"
     networks:
@@ -15,20 +15,6 @@ services:
       - "~/deon/fabric-samples/first-network/crypto-config:/config/crypto-config:ro"
     depends_on:
       - ipfs
-
-  vote:
-    image: deon/vote:latest
-    container_name: vote.example.com
-    build: ./vote
-    ports:
-      - "8002:8002"
-    networks:
-      - net_byfn
-    volumes:
-      - "~/deon/fabric-samples/first-network/channel-artifacts:/config/channel-artifacts:ro"
-      - "~/deon/fabric-samples/first-network/crypto-config:/config/crypto-config:ro"
-    depends_on:
-      - deon
 
   ipfs:
     image: ipfs/go-ipfs:latest
