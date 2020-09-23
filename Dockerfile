@@ -5,6 +5,9 @@ ENV IPFS_ENDPOINT ipfs.node.example.com:5001
 ENV CHANNEL_CONFIG /config/channel-artifacts/channel.tx
 ENV CHAINCODE_GOPATH /
 
+ENV CORE_URL 0.0.0.0:8001
+ENV VOTE_URL 0.0.0.0:8002
+
 # Set working directory
 WORKDIR /src/
 # Copy project to src directory

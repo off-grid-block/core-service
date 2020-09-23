@@ -22,11 +22,12 @@ Start up the Fabric network:
 2. ```./byfn.sh up -s couchdb```
 
 Start up the DEON service API:
-1. ```mkdir deon``` and copy the docker-compose script (below) into the ```deon``` directory
+1. ```mkdir deon```
 2. clone this repository into the ```deon``` directory
-3. clone the repository at ```github.com/off-grid-block/vote``` into ```deon```
-2. ```docker-compose up``` at ```deon``` directory level
-3. access the API at ```localhost:8001/api/v1/```
+3. mv the ```docker-compose.yaml``` file included in this repository into the parent ```deon``` directory
+4. clone the repository at ```github.com/off-grid-block/vote``` into ```deon```
+5. ```docker-compose up``` at ```deon``` directory level
+6. access the API at ```localhost:8001/api/v1/```
 
 To stop the network and DEON service:
 1. ```./byfn.sh down``` inside ```fabric-samples/first-network```

@@ -7,7 +7,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	// "net/http/httputil"
+	// "net/url"
 	"time"
+	// "os"
+	// "strings"
 
 )
 
@@ -34,58 +38,6 @@ func Serve(app *Application) {
 	/********************************/
 	api.HandleFunc("/register", app.UserHandler).Methods("POST")
 
-	/*********************************/
-	/*	subrouter for "poll" prefix  */
-	/*********************************/
-	// poll := api.PathPrefix("/poll").Subrouter()
-
-	// // handler for initPoll
-	// poll.HandleFunc("", voteApp.InitPollHandler).Methods("POST")
-
-	// // handler for queryAllPolls
-	// poll.HandleFunc("", voteApp.QueryAllPollsHandler).Methods("GET")
-
-	// // handler for updatePollStatus
-	// poll.HandleFunc("/{pollid}/status", voteApp.UpdatePollStatusHandler).Methods("PUT")
-
-	// // handler for getPoll
-	// poll.HandleFunc("/{pollid}", voteApp.GetPollHandler).Methods("GET")
-
-	// // handler for getPollPrivateDetails
-	// poll.HandleFunc("/{pollid}/private", voteApp.getPollPrivateDetailsHandler).Methods("GET")
-
-	/*********************************/
-	/*	subrouter for "vote" prefix  */
-	/*********************************/
-	// vote := api.PathPrefix("/vote").Subrouter()
-
-	// // handler for initVote
-	// vote.HandleFunc("", voteApp.InitVoteHandler).Methods("POST")
-
-	// // handler for getVotePrivateDetails
-	// vote.HandleFunc("/{pollid}/{voterid}/private", voteApp.getVotePrivateDetailsHandler).Methods("GET")
-
-	// // handler for getVotePrivateDetailsHash
-	// vote.HandleFunc("/{pollid}/{voterid}/hash", voteApp.getVotePrivateDetailsHashHandler).Methods("GET")
-
-	// // handler for getVote
-	// vote.HandleFunc("/{pollid}/{voterid}", voteApp.GetVoteHandler).Methods("GET")
-
-	// // handler for queryVotePrivateDetailsByPoll
-	// vote.HandleFunc("", voteApp.QueryVotePrivateDetailsByPollHandler).
-	// 	Methods("GET").
-	// 	Queries("type", "private", "pollid", "{pollid}")
-
-	// // handler for queryVotesByPoll
-	// vote.HandleFunc("", voteApp.QueryVotesByPollHandler).
-	// 	Methods("GET").
-	// 	Queries("type", "public", "pollid", "{pollid}")
-
-	// // handler for getVotesByVoter
-	// vote.HandleFunc("", voteApp.QueryVotesByVoterHandler).
-	// 	Methods("GET").
-	// 	Queries("voterid", "{voterid}")
-
 	// Start http server
 	srv := &http.Server{
 		Handler: 	r,
@@ -96,4 +48,5 @@ func Serve(app *Application) {
 
 	fmt.Printf("Listening on %v...\n", srv.Addr)
 	log.Fatal(srv.ListenAndServe())
+	
 }
