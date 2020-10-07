@@ -8,35 +8,27 @@ import (
 
 	"github.com/off-grid-block/core-service/blockchain"
 
-	caMsp "github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
+	caMsp "github.com/off-grid-block/fabric-sdk-go/pkg/client/msp"
 )
 
 func (app *Application) UserHandler(w http.ResponseWriter, r *http.Request) {
-	// data := &struct {
-	// 	Name 		string
-	// 	Secret      string
-	// 	Type      	string
-	// }{
-	// 	Name: 		"",
-	// 	Secret:     "",
-	// 	Type:      	"",
-	// }
+
 	affl := strings.ToLower("org1") + ".department1"
 
 	data := caMsp.RegistrationRequest{
-		Name:           "email",
-		Secret:         "password",
-		Type:           "peer",
+		Name: "email",
+		Secret: "password",
+		Type: "peer",
 		MaxEnrollments: -1,
-		Affiliation:    affl,
+		Affiliation: affl,
 		Attributes: []caMsp.Attribute{
 			{
-				Name:  "role",
+				Name: "role",
 				Value: "user",
 				ECert: true,
 			},
 		},
-		CAName: "ca.org1.hf.sample.io",
+		CAName: "ca.org1.example.com",
 	}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&data)
@@ -44,10 +36,11 @@ func (app *Application) UserHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	_, err = blockchain.RegUser(app.FabricSDK, data)
+	_, err = blockchain.Register(app.FabricSDK, data)
+
+	fmt.Println(err)
 
 	if err != nil {
-		fmt.Println(err)
 		http.Error(w, "Unable to invoke hello in the blockchain", 500)
 	}
 }

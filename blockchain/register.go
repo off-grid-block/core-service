@@ -1,14 +1,14 @@
 package blockchain
 
 import (
-	caMsp "github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
+	caMsp "github.com/off-grid-block/fabric-sdk-go/pkg/client/msp"
 	"github.com/pkg/errors"
 	//"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"fmt"
 )
 
 // InvokeHello
-func RegUser(s *SetupSDK, data caMsp.RegistrationRequest) (string, error) {
+func Register(s *SetupSDK, data caMsp.RegistrationRequest) (string, error) {
 
 	// Prepare arguments
 	var args []string

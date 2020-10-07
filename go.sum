@@ -131,6 +131,12 @@ github.com/off-grid-block/core-interface v0.0.0-20200914183632-244dc368f166 h1:7
 github.com/off-grid-block/core-interface v0.0.0-20200914183632-244dc368f166/go.mod h1:z4NrYo9B/SRZ5ogxTTd9O/V6vCXjcgMLf27gEMCySFw=
 github.com/off-grid-block/core-interface v0.0.0-20200915132455-14563a2cd9b8 h1:dr0EswDIbxUVPyZzmUY4AOKBWONtmBkN5XEz0mYXI44=
 github.com/off-grid-block/core-interface v0.0.0-20200915132455-14563a2cd9b8/go.mod h1:z4NrYo9B/SRZ5ogxTTd9O/V6vCXjcgMLf27gEMCySFw=
+github.com/off-grid-block/fabric-protos-go v0.0.0-20200929182751-c59fe09a026b h1:rauBOa0/sIUt9MBr2/mrpc/8mj5HkENkSPJGypFZkDc=
+github.com/off-grid-block/fabric-protos-go v0.0.0-20200929182751-c59fe09a026b/go.mod h1:3v3u/cK7uRltroeV0BibcaZEYqhALVeQ0W5iZxNfcB8=
+github.com/off-grid-block/fabric-sdk-go v1.0.0-beta1.0.20200929184326-1900a86239e4 h1:JnTLD2AKekUQarvTvxxsWpAH1E9O0yb+XalV41RdOaU=
+github.com/off-grid-block/fabric-sdk-go v1.0.0-beta1.0.20200929184326-1900a86239e4/go.mod h1:hYLNjATebb0bpmH1O0arXxApxGgBCcO7B7vWHnK42GM=
+github.com/off-grid-block/fabric-sdk-go v1.0.0-beta1.0.20201005202441-7fae040fbb47 h1:kpcLwuAmsfWq7gsoPG1ayFnxGHRIcWRJNgXAvTmFqtY=
+github.com/off-grid-block/fabric-sdk-go v1.0.0-beta1.0.20201005202441-7fae040fbb47/go.mod h1:hYLNjATebb0bpmH1O0arXxApxGgBCcO7B7vWHnK42GM=
 github.com/off-grid-block/off-grid-sdk v0.0.0-20191024214633-a41d78581dff/go.mod h1:49Y+H1IAyVomXeT4MW34Ekp0Amz3gIcWboKTVhH4OR4=
 github.com/off-grid-block/vote v0.0.0-20200613222818-02a8f332fc65/go.mod h1:DesDDpddIOcJFt35SrfJiru3ZVcGNreK0NKnT7ULLBQ=
 github.com/off-grid-block/vote v0.0.0-20200614145829-c6fb83e4b0a0 h1:V17hRqOwkLs9CQfAfLAiUXUMVm+8grzcSfRE1WRkpdY=
