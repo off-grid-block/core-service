@@ -9,7 +9,7 @@ services:
     ports:
       - "8001:8001"
     networks:
-      - net_byfn
+      - net_deon
     volumes:
       - type: bind
         source: ~/deon/fabric-samples/first-network/channel-artifacts
@@ -36,10 +36,10 @@ services:
       - "/tmp/ipfs-docker-staging:/export"
       - "/tmp/ipfs-docker-data:/data/ipfs"
     networks:
-      - net_byfn
+      - net_deon
 
 networks:
-  net_byfn:
+  net_deon:
     external: true
 
 volumes:
