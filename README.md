@@ -31,11 +31,14 @@ After launching the Fabric and VON networks, start up the DEON service API.
 2. ```cd core-service```
 3. ``export DOCKERHOST=`docker run --rm --net=host eclipse/che-ip` ``
 4. ```docker-compose up```
-5. access the API at ```localhost:8001/api/v1/```
+5. access the API at ```localhost:8000/api/v1/```
 
-To stop the network and DEON service:
-6. ```./cyfn.sh down``` inside ```off-grid-net```
-7. ```docker-compose down```
+To stop the networks and DEON service:
+1. ```./manage down``` inside ```von-network``` directory
+2. ```./cyfn.sh down``` inside ```off-grid-net``` directory
+4. ```docker volume prune```
+5. ```docker-compose down```
+6. ```docker-compose rm -f```
 
 ### Register the DEON service on Indy
 
