@@ -1,36 +1,59 @@
+
 ***This repository is a work in progress.***
 
 # DEON core-service
-The Core Service of the DEON platform. This repository allows the adminstrative configuration and management of the DEON Hyperledger Fabric network. The service deploys the DEON platform REST API that exposes the configuration functions and the DEON suite of applications. The API is deployed locally on localhost:8001.
+The Core Service of the DEON platform. This repository enables the administrative configuration and management of the DEON Hyperledger Fabric network. The service deploys the DEON platform REST API that exposes the configuration functions and the DEON suite of applications. The API is deployed locally on ```http://localhost:8001```. See documentation of the API at https://app.swaggerhub.com/apis/haniavis/deon-core/0.1.0.
 
 ## Setup
 
-### Hyperledger Fabric
+### Prerequisites
 
-1. Clone the Hyperledger `fabric-samples` repository:
-```git clone https://github.com/hyperledger/fabric-samples.git```
-2. Inside `fabric-samples`, checkout to version 1.4.2:
-```git checkout 1.4.2```
-3. Replace the `first-network/byfn.sh` script with the script found [here](https://github.com/off-grid-block/off-grid-net/blob/master/cyfn.sh).
-4. Download the Hyperledger Fabric v1.4.2 docker images:
-```curl -sSL https://bit.ly/2ysbOFE | bash -s -- 1.4.2```
+1. Docker Desktop (2.2.0.0)
+
+### DEON Fabric network
+
+1. Clone the DEON `off-grid-block/off-grid-net` repository:
+```git clone https://github.com/off-grid-block/off-grid-net.git```
+2. Launch the network:
+```./cyfn.sh up -s couchdb```
+
+### VON Network (Indy)
+The DEON services rely on VON Network, an implementation of a development level Indy Node network, developed by BCGov. For more information on the project and for additional instructions, see their [github repository](https://github.com/bcgov/von-network).
+
+1. clone the repository: ```git clone https://github.com/bcgov/von-network.git```
+2. Generate the Docker images: ```./manage build```
+3. Start up the network: ```./manage start```
 
 ### Launch using Docker
-
-Start up the Fabric network:
-1. ```cd fabric-samples/first-network``` (inside your fabric-samples repository)
-2. ```./byfn.sh up -s couchdb```
-
-Start up the DEON service API:
-1. ```cd core-service```
-2. ```docker-compose up```
-3. access the API at ```localhost:8001/api/v1/```
+After launching the Fabric and VON networks, start up the DEON service API.
+1. Clone this repository:
+```git clone https://github.com/off-grid-block/core-service.git```
+2. ```cd core-service```
+3. ``export DOCKERHOST=`docker run --rm --net=host eclipse/che-ip` ``
+4. ```docker-compose up```
+5. access the API at ```localhost:8001/api/v1/```
 
 To stop the network and DEON service:
-1. ```./byfn.sh down``` inside ```fabric-samples/first-network```
-2. ```docker-compose down```
+6. ```./cyfn.sh down``` inside ```off-grid-net```
+7. ```docker-compose down```
 
+### Register the DEON service on Indy
 
-### Launch additional DEON apps (example: Vote Service)
+To test the demo, the first step is establishing a connection between the client and CI/MSP Aries Cloud Agents and creating a verifiable credential.
+1. Access the client agent hosted at http://localhost:4201
+2. Click the button labeled "Get invitation from Issuer agent"
+3. Navigate to the CI/MSP agent at http://localhost:4200
+4. On the sidebar, select "Schema and Credential definition" and create a schema with attributes "app_name, app_id" (name the schema whatever you like)
+5. On the credential tab, issue a credential to the client agent.
+
+Next, we will register the DEON vote application with the identity management agents. Send a POST request to http://localhost:8000/api/v1/register with the following body: `{
+"Name": "Voting",
+"Secret": "kerapwd",
+"Type": "user"
+}`
+
+### Launch DEON apps (example: Vote Service)
 1. clone the repository at ```github.com/off-grid-block/vote``` into ```deon```
 2. ```docker-compose up```
+3. See instructions on the full demo in the ```off-grid-block/vote``` repository
+

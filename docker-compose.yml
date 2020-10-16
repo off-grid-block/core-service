@@ -38,6 +38,56 @@ services:
     networks:
       - net_deon
 
+  ci_msp:
+    image: deonproject/faber-alice-demo:latest
+    container_name: ci_msp.example.com
+    build: 
+      context: ./aca-py-controllers
+      dockerfile: ./docker/Dockerfile.demo
+    ports:
+      - "7990-7999:7990-7999"
+    environment:
+      - DOCKERHOST=${DOCKERHOST}
+      - RUNMODE=docker
+    networks:
+      - net_deon
+    command: ci_msp --port 7990
+
+  client:
+    image: deonproject/faber-alice-demo:latest
+    container_name: client.example.com
+    build: 
+      context: ./aca-py-controllers
+      dockerfile: ./docker/Dockerfile.demo
+    ports:
+      - "8010-8020:8010-8020"
+    environment:
+      - DOCKERHOST=${DOCKERHOST}
+      - RUNMODE=docker
+    networks:
+      - net_deon
+    command: client --port 8010 --container client.example.com
+
+  ci_msp_ui:
+    image: deonproject/ci-msp-ui:latest
+    container_name: ci-msp-ui
+    build:
+      context: ./admin/ci_admin_ui
+    ports:
+      - "4200:4200"
+    depends_on:
+      - ci_msp
+
+  client_ui:
+    image: deonproject/client-ui:latest
+    container_name: client-ui
+    build:
+      context: ./admin/client
+    ports:
+      - "4201:4201"
+    depends_on:
+      - client
+
 networks:
   net_deon:
     external: true
