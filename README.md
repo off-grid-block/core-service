@@ -10,6 +10,11 @@ The Core Service of the DEON platform. This repository enables the administrativ
 
 1. Docker Desktop (2.2.0.0)
 
+To be added...
+
+## Demo
+For running a demo of the full DEON stack follow the instructions below.
+
 ### DEON Fabric network
 
 1. Clone the DEON repository for the Fabric network `off-grid-block/off-grid-net`:
