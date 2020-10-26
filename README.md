@@ -12,17 +12,26 @@ The Core Service of the DEON platform. This repository enables the administrativ
 
 ### DEON Fabric network
 
-1. Clone the DEON `off-grid-block/off-grid-net` repository:
-```git clone https://github.com/off-grid-block/off-grid-net.git```
-2. Launch the network:
-```./cyfn.sh up -s couchdb```
+1. Clone the DEON repository for the Fabric network `off-grid-block/off-grid-net`:
 
-### VON Network (Indy)
+```git clone https://github.com/off-grid-block/off-grid-net.git```
+
+2. Launch the Fabric network:
+
+```cd off-grid-ne/t && ./cyfn.sh up -c off-channel -s couchdb```
+
+### VON Network (Indy ledger)
 The DEON services rely on VON Network, an implementation of a development level Indy Node network, developed by BCGov. For more information on the project and for additional instructions, see their [github repository](https://github.com/bcgov/von-network).
 
-1. clone the repository: ```git clone https://github.com/bcgov/von-network.git```
-2. Generate the Docker images: ```./manage build```
-3. Start up the network: ```./manage start```
+1. Clone the repository: ```git clone https://github.com/bcgov/von-network.git```
+2. In the von-network repository: ```cd von-network/```
+3. Generate the Docker images: ```./manage build```
+4. Start up the network: ```./manage start```
+
+### Aries Agents
+The DEON services rely on the Aries Cloud Agent-Python (aca-py), developed by BCGov. For more information on the project and for additional instructions, see the official [github repository](https://github.com/hyperledger/aries-cloudagent-python). You need to clone the modified aca-py agents provided by DEON to enable Decentralized Identity Management.
+
+1. clone the repository: ```git clone https://github.com/off-grid-block/aca-py-controllers.git```
 
 ### Launch using Docker
 After launching the Fabric and VON networks, start up the DEON service API.
