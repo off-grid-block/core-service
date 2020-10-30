@@ -12,11 +12,13 @@ services:
       - net_deon
     volumes:
       - type: bind
-        source: ~/deon/fabric-samples/first-network/channel-artifacts
+        #source: ~/deon/fabric-samples/first-network/channel-artifacts
+        source: ../off-grid-net/channel-artifacts
         target: /config/channel-artifacts
         read_only: true
       - type: bind
-        source: ~/deon/fabric-samples/first-network/crypto-config
+        #source: ~/deon/fabric-samples/first-network/crypto-config
+        source: ../off-grid-net/crypto-config
         target: /config/crypto-config
         read_only: true
       - type: volume
@@ -68,25 +70,25 @@ services:
       - net_deon
     command: client --port 8010 --container client.example.com
 
-  ci_msp_ui:
-    image: deonproject/ci-msp-ui:latest
-    container_name: ci-msp-ui
-    build:
-      context: ../admin/ci_admin_ui
-    ports:
-      - "4200:4200"
-    depends_on:
-      - ci_msp
-
-  client_ui:
-    image: deonproject/client-ui:latest
-    container_name: client-ui
-    build:
-      context: ../admin/client
-    ports:
-      - "4201:4201"
-    depends_on:
-      - client
+    #  ci_msp_ui:
+    #    image: deonproject/ci-msp-ui:latest
+    #    container_name: ci-msp-ui
+    #    build:
+    #      context: ../admin/ci_admin_ui
+    #    ports:
+    #      - "4200:4200"
+    #    depends_on:
+    #      - ci_msp
+    #
+    #  client_ui:
+    #    image: deonproject/client-ui:latest
+    #    container_name: client-ui
+    #    build:
+    #      context: ../admin/client
+    #    ports:
+    #      - "4201:4201"
+    #    depends_on:
+    #      - client
 
 networks:
   net_deon:
