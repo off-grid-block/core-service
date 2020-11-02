@@ -12,11 +12,13 @@ services:
       - net_deon
     volumes:
       - type: bind
-        source: ~/deon/fabric-samples/first-network/channel-artifacts
+        #source: ~/deon/fabric-samples/first-network/channel-artifacts
+        source: ../off-grid-net/channel-artifacts
         target: /config/channel-artifacts
         read_only: true
       - type: bind
-        source: ~/deon/fabric-samples/first-network/crypto-config
+        #source: ~/deon/fabric-samples/first-network/crypto-config
+        source: ../off-grid-net/crypto-config
         target: /config/crypto-config
         read_only: true
       - type: volume
@@ -87,6 +89,7 @@ services:
   #     - "4201:4201"
   #   depends_on:
   #     - client
+
 
 networks:
   net_deon:
