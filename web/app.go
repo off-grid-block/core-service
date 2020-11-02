@@ -12,7 +12,6 @@ import (
 	"time"
 	"os"
 	"strings"
-	// "strings"
 
 )
 
@@ -29,7 +28,20 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 // Proxy handler to redirect requests
 func RequestAndRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	proxyUrl := getProxyUrl(r)
-	serveRedirect(proxyUrl, w, r)
+	proxyPath := getProxyPath(proxyUrl, r)
+	serveRedirect(proxyUrl, proxyPath, w, r)
+}
+
+func getProxyPath(proxyUrl string, r *http.Request) string {
+
+	if proxyUrl == os.Getenv("CLIENT_ACAPY_AGENT_URL") {
+		return strings.TrimPrefix(r.URL.Path, "/api/v1/client")
+
+	} else if proxyUrl == os.Getenv("CI_MSP_ACAPY_AGENT_URL") {
+		return strings.TrimPrefix(r.URL.Path, "/api/v1/ci-msp")
+	}
+
+	return r.URL.Path
 }
 
 // Retrieve the correct host:port for the specified application
@@ -41,6 +53,14 @@ func getProxyUrl(r *http.Request) string {
 		fmt.Println("Redirecting to vote service...")
 		return os.Getenv("VOTE_URL")
 
+	} else if strings.HasPrefix(r.URL.Path, "/api/v1/client") {
+		fmt.Println("Redirecting to client ACA-Py agent...")
+		return os.Getenv("CLIENT_ACAPY_AGENT_URL")
+
+	} else if strings.HasPrefix(r.URL.Path, "/api/v1/ci-msp") {
+		fmt.Println("Redirecting to CI/MSP ACA-Py agent...")
+		return os.Getenv("CI_MSP_ACAPY_AGENT_URL")
+
 	} else {
 		log.Fatalf("Failed to match path: %v\n", r.URL.Path)
 		return ""
@@ -48,7 +68,7 @@ func getProxyUrl(r *http.Request) string {
 }
 
 // Redirect the request to the URL specified
-func serveRedirect(host string, w http.ResponseWriter, r *http.Request) {
+func serveRedirect(host string, path string, w http.ResponseWriter, r *http.Request) {
 
 	u, err := url.Parse(host)
 	if err != nil {
@@ -57,6 +77,7 @@ func serveRedirect(host string, w http.ResponseWriter, r *http.Request) {
 
 	proxy := httputil.NewSingleHostReverseProxy(u)
 	
+	r.URL.Path = path
 	r.URL.Host = u.Host
 	r.URL.Scheme = u.Scheme
 	r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))

@@ -7,7 +7,7 @@ services:
     container_name: deon.example.com
     build: .
     ports:
-      - "8001:8001"
+      - "8000:8000"
     networks:
       - net_deon
     volumes:
@@ -68,25 +68,25 @@ services:
       - net_deon
     command: client --port 8010 --container client.example.com
 
-  ci_msp_ui:
-    image: deonproject/ci-msp-ui:latest
-    container_name: ci-msp-ui
-    build:
-      context: ../admin/ci_admin_ui
-    ports:
-      - "4200:4200"
-    depends_on:
-      - ci_msp
+  # ci_msp_ui:
+  #   image: deonproject/ci-msp-ui:latest
+  #   container_name: ci-msp-ui
+  #   build:
+  #     context: ../admin/ci_admin_ui
+  #   ports:
+  #     - "4200:4200"
+  #   depends_on:
+  #     - ci_msp
 
-  client_ui:
-    image: deonproject/client-ui:latest
-    container_name: client-ui
-    build:
-      context: ../admin/client
-    ports:
-      - "4201:4201"
-    depends_on:
-      - client
+  # client_ui:
+  #   image: deonproject/client-ui:latest
+  #   container_name: client-ui
+  #   build:
+  #     context: ../admin/client
+  #   ports:
+  #     - "4201:4201"
+  #   depends_on:
+  #     - client
 
 networks:
   net_deon:

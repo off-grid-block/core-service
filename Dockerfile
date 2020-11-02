@@ -6,8 +6,11 @@ ENV CHANNEL_CONFIG /config/channel-artifacts/channel.tx
 ENV CHAINCODE_GOPATH /
 ENV CLIENT_AGENT_URL http://client.example.com:8013
 
+ENV CLIENT_ACAPY_AGENT_URL http://client.example.com:8011
+ENV CI_MSP_ACAPY_AGENT_URL http://ci_msp.example.com:7991
+
 ENV CORE_URL 0.0.0.0:8000
-ENV VOTE_URL http://vote.example.com:8002
+ENV VOTE_URL http://vote.example.com:8001
 
 # Set working directory
 WORKDIR /src/
