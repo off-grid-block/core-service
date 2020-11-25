@@ -1,0 +1,69 @@
+version: "3.3"
+
+services:
+
+  deon:
+    image: deonproject/core-service:latest
+    container_name: deon.example.com
+    build: .
+    ports:
+      - "8000:8000"
+    networks:
+      - net_deon
+    volumes:
+      - type: bind
+        source: ~/deon/fabric-samples/first-network/channel-artifacts
+        target: /config/channel-artifacts
+        read_only: true
+      - type: bind
+        source: ~/deon/fabric-samples/first-network/crypto-config
+        target: /config/crypto-config
+        read_only: true
+      - type: volume
+        source: state-store
+        target: /tmp/state-store
+    depends_on:
+      - ipfs
+
+  vote:
+    image: deonproject/vote:latest
+    container_name: vote.example.com
+    build: .
+    ports:
+      - "8001:8001"
+    networks:
+      - net_deon
+    volumes:
+      - type: bind
+        source: ~/deon/fabric-samples/first-network/channel-artifacts
+        target: /config/channel-artifacts
+        read_only: true
+      - type: bind
+        source: ~/deon/fabric-samples/first-network/crypto-config
+        target: /config/crypto-config
+        read_only: true
+      - type: volume
+        source: state-store
+        target: /tmp/state-store
+    depends_on:
+      - deon
+
+  ipfs:
+    image: ipfs/go-ipfs:latest
+    container_name: ipfs.node.example.com
+    ports:
+      - "8080:8080"
+      - "4001:4001"
+      - "5001:5001"
+    volumes:
+      - "/tmp/ipfs-docker-staging:/export"
+      - "/tmp/ipfs-docker-data:/data/ipfs"
+    networks:
+      - net_deon
+
+networks:
+  net_deon:
+    external: true
+
+volumes:
+  state-store:
