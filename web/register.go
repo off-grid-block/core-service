@@ -37,10 +37,8 @@ func (app *Application) UserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err = blockchain.Register(app.FabricSDK, data)
-
-	fmt.Println(err)
-
 	if err != nil {
-		http.Error(w, "Unable to invoke hello in the blockchain", 500)
+		fmt.Println(err)
+		http.Error(w, "Failed to register app with DEON network", 500)
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	ipfs "github.com/ipfs/go-ipfs-api"
-	"github.com/off-grid-block/controller"
 	"github.com/off-grid-block/core-service/blockchain"
 	"log"
 	"net/http"
@@ -86,29 +85,21 @@ func serveRedirect(host string, path string, w http.ResponseWriter, r *http.Requ
 	proxy.ServeHTTP(w, r)
 }
 
-type ControllerManager struct {
-	admin *controller.AdminController
-	client *controller.ClientController
-}
-
-func (mgr *ControllerManager) Initialized() bool {
-	return (mgr.admin != nil) && (mgr.client != nil)
-}
-
+// Serve core DEON service API
 func Serve(app *Application) {
 
-	// controller manager
-	mgr := ControllerManager{}
+	// initialize controller manager
+	mgr := NewControllerManager()
 
 	// create router object
 	r := mux.NewRouter()
 	api := r.PathPrefix("/api/v1").Subrouter()
 
 	// identity management endpoints
-	api.HandleFunc("/register", app.UserHandler).Methods("POST")
-	api.HandleFunc("/agents/initialize", mgr.InitializeControllersHandler).Methods("POST")
-	api.HandleFunc("/agents/connect", mgr.EstablishConnectionHandler).Methods("POST")
-	api.HandleFunc("/agents/issue-credential", mgr.IssueCredentialHandler).Methods("POST")
+	api.HandleFunc("/admin/app/register", app.UserHandler).Methods("POST")
+	api.HandleFunc("/admin/agents/connect", mgr.EstablishConnectionHandler).Methods("POST")
+	api.HandleFunc("/admin/agents/register-public-did", mgr.RegisterPublicDidHandler).Methods("POST")
+	api.HandleFunc("/admin/agents/issue-credential", mgr.IssueCredentialHandler).Methods("POST")
 
 	// api.HandleFunc("/", HomeHandler)
 

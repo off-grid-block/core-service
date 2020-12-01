@@ -1,33 +1,63 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/off-grid-block/controller"
+	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 )
 
-// Issue credential based on DEON app credential definition
-func (mgr *ControllerManager) InitializeControllersHandler(w http.ResponseWriter, r *http.Request) {
+type ControllerManager struct {
+	admin *controller.AdminController
+	client *controller.ClientController
+}
+
+// Check if Controller Manager is initialized
+func (mgr *ControllerManager) Initialized() bool {
+	return (mgr.admin != nil) && (mgr.client != nil)
+}
+
+// initialize controllers
+func NewControllerManager() *ControllerManager {
+	var mgr ControllerManager
+
+	mgr.admin, _ = controller.NewAdminController()
+	mgr.client, _ = controller.NewClientController()
+
+	return &mgr
+}
+
+
+// util that generates seeds for did registration with ledger
+func Seed() string {
+	seed := "my_seed_000000000000000000000000"
+	randInt := rand.Intn(800000) + 100000
+	seed = seed + strconv.Itoa(randInt)
+	return seed[len(seed)-32:]
+}
+
+func (mgr *ControllerManager) RegisterPublicDidHandler(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
-	mgr.admin, err = controller.NewAdminController()
+	_, err = controller.RegisterDidWithLedger(mgr.admin, Seed())
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "Failed to initialize admin controller", 500)
-		return
+		http.Error(w, "Failed to register public admin did", 500)
 	}
 
-	mgr.client, err = controller.NewClientController()
+	_, err = controller.RegisterDidWithLedger(mgr.client, Seed())
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "Failed to initialize client controller", 500)
-		return
+		http.Error(w, "Failed to register public client did", 500)
 	}
 
-	w.Write([]byte("Initialized"))
+	w.Write([]byte("Registered public DIDs"))
 }
+
 
 func (mgr *ControllerManager) EstablishConnectionHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -70,6 +100,11 @@ func (mgr *ControllerManager) EstablishConnectionHandler(w http.ResponseWriter, 
 	w.Write([]byte("Connection established"))
 }
 
+type IssueCredentialRequest struct {
+	appName string `json:"app_name"`
+	appID string `json:"app_id"`
+}
+
 // Issue credential based on DEON app credential definition
 func (mgr *ControllerManager) IssueCredentialHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -87,7 +122,14 @@ func (mgr *ControllerManager) IssueCredentialHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	err = mgr.admin.IssueCredential("voter", "101")
+	var req IssueCredentialRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Issue credential request badly formed", 400)
+		return
+	}
+
+	err = mgr.admin.IssueCredential(req.appName, req.appID)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Unable to issue credential", 500)
