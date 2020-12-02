@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/off-grid-block/core-service/web"
 	"github.com/off-grid-block/core-service/blockchain"
+	"github.com/off-grid-block/core-service/web"
+	"fmt"
 	// "github.com/pkg/errors"
 	ipfs "github.com/ipfs/go-ipfs-api"
-	"fmt"
 	"os"
 )
 
@@ -47,11 +47,18 @@ func main() {
 	// create shell to connect to IPFS
 	sh := ipfs.NewShell(os.Getenv("IPFS_ENDPOINT"))
 
+	// initialize manager for deon network's aca-py agents
+	mgr, err := web.NewControllerManager()
+	if err != nil {
+		fmt.Printf("Failed to start controller manager: %v\n", err)
+		return
+	}
+
 	app := &web.Application{
 		FabricSDK: &fSetup,
 		IpfsShell: sh,
+		ControllerMgr: mgr,
 	}
 
 	web.Serve(app)
-
 }

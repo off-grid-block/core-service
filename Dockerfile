@@ -4,10 +4,10 @@ FROM golang:1.13-alpine AS build
 ENV IPFS_ENDPOINT ipfs.node.example.com:5001
 ENV CHANNEL_CONFIG /config/channel-artifacts/channel.tx
 ENV CHAINCODE_GOPATH /
-# ENV CLIENT_AGENT_URL http://client.example.com:8013
+ENV CLIENT_AGENT_URL http://client.example.com:8031
 
-ENV CLIENT_ACAPY_AGENT_URL http://client.example.com:8021
-ENV CI_MSP_ACAPY_AGENT_URL http://ci_msp.example.com:8031
+#ENV CLIENT_ACAPY_AGENT_URL http://client.example.com:8021
+#ENV CI_MSP_ACAPY_AGENT_URL http://ci_msp.example.com:8031
 
 ENV CORE_URL 0.0.0.0:8000
 ENV VOTE_URL http://vote.example.com:8001

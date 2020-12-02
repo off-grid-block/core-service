@@ -3,8 +3,8 @@ package web
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	ipfs "github.com/ipfs/go-ipfs-api"
 	"github.com/off-grid-block/core-service/blockchain"
+	ipfs "github.com/ipfs/go-ipfs-api"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -17,6 +17,7 @@ import (
 type Application struct {
 	FabricSDK *blockchain.SetupSDK
 	IpfsShell *ipfs.Shell
+	ControllerMgr *ControllerManager
 }
 
 // Homepage
@@ -48,7 +49,7 @@ func getProxyUrl(r *http.Request) string {
 
 	fmt.Println("Path: " + r.URL.Path)
 
-	if strings.HasPrefix(r.URL.Path, "/api/v1/vote") || strings.HasPrefix(r.URL.Path, "/api/v1/poll") {
+	if strings.HasPrefix(r.URL.Path, "/api/v1/vote-app") {
 		fmt.Println("Redirecting to vote service...")
 		return os.Getenv("VOTE_URL")
 
@@ -88,18 +89,15 @@ func serveRedirect(host string, path string, w http.ResponseWriter, r *http.Requ
 // Serve core DEON service API
 func Serve(app *Application) {
 
-	// initialize controller manager
-	mgr := NewControllerManager()
-
 	// create router object
 	r := mux.NewRouter()
 	api := r.PathPrefix("/api/v1").Subrouter()
 
 	// identity management endpoints
-	api.HandleFunc("/admin/app/register", app.UserHandler).Methods("POST")
-	api.HandleFunc("/admin/agents/connect", mgr.EstablishConnectionHandler).Methods("POST")
-	api.HandleFunc("/admin/agents/register-public-did", mgr.RegisterPublicDidHandler).Methods("POST")
-	api.HandleFunc("/admin/agents/issue-credential", mgr.IssueCredentialHandler).Methods("POST")
+	api.HandleFunc("/admin/agent", app.NewControllerHandler).Methods("POST")
+	api.HandleFunc("/admin/agent/{agent_id}/connect", app.EstablishConnectionHandler).Methods("POST")
+	api.HandleFunc("/admin/agent/{agent_id}/register-ledger", app.RegisterLedgerHandler).Methods("POST")
+	api.HandleFunc("/admin/agent/{agent_id}/issue-credential", app.IssueCredentialHandler).Methods("POST")
 
 	// api.HandleFunc("/", HomeHandler)
 
