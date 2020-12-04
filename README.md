@@ -43,7 +43,7 @@ After launching the Fabric and VON networks, start up the DEON service API.
 1. Clone this repository:
 ```git clone https://github.com/off-grid-block/core-service.git```
 2. ```cd core-service```
-3. ``export DOCKERHOST=`docker run --rm --net=host eclipse/che-ip` ``
+3. ```export DOCKERHOST=`docker run --rm --net=host eclipse/che-ip````
 4. ```docker-compose up```
 5. access the API at ```localhost:8000/api/v1/```
 

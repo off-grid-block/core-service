@@ -18,25 +18,20 @@ import (
 type ControllerManager struct {
 	admin *controller.AdminController
 	clients ClientControllerStore
+	ledgerUrl string
 }
 
 type ClientControllerStore map[string]*controller.ClientController
 
 // initialize controllers
-func NewControllerManager() (*ControllerManager, error) {
+func NewControllerManager(ledgerUrl string) (*ControllerManager, error) {
 	var mgr ControllerManager
-
-	// initialize admin controller
-	mgr.admin, _ = controller.NewAdminController()
-
-	//// register admin agent DID with ledger
-	//_, err := controller.RegisterDidWithLedger(mgr.admin, Seed())
-	//if err != nil {
-	//	return nil, err
-	//}
 
 	// initialize map
 	mgr.clients = make(ClientControllerStore)
+
+	// add ledger url
+	mgr.ledgerUrl = ledgerUrl
 
 	return &mgr, nil
 }
@@ -49,33 +44,31 @@ func Seed() string {
 	return seed[len(seed)-32:]
 }
 
-
-func (app *Application) NewControllerHandler(w http.ResponseWriter, r *http.Request) {
-
-	req := struct {
-		Alias string `json:"alias"`
-		AgentUrl string `json:"agent_url"`
-		Name string `json:"name"`
-		Secret string `json:"secret"`
-		Type string `json:"type"`
-	}{}
-
-	err := json.NewDecoder(r.Body).Decode(&req)
+func (app *Application) newAdminController(req NewControllerRequest) error {
+	var err error
+	app.ControllerMgr.admin, err = controller.NewAdminController("http://admin.example.com:8021")
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "Failed to decode new controller request", 500)
-		return
+		return err
 	}
+
+	// register admin agent DID with ledger
+	_, err = controller.RegisterDidWithLedger(app.ControllerMgr.admin, Seed(), app.ControllerMgr.ledgerUrl)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (app *Application) newClientController(req NewControllerRequest) (string, error) {
 
 	// create new client controller
 	cc, _ := controller.NewClientController(req.Alias, req.AgentUrl)
 
 	// register public DID on ledger
-	_, err = controller.RegisterDidWithLedger(cc, Seed())
+	_, err := controller.RegisterDidWithLedger(cc, Seed(), app.ControllerMgr.ledgerUrl)
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "Failed to register public client did", 500)
-		return
+		return "", err
 	}
 
 	// register app DID with DEON network
@@ -98,50 +91,89 @@ func (app *Application) NewControllerHandler(w http.ResponseWriter, r *http.Requ
 
 	_, err = blockchain.Register(app.FabricSDK, data)
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "Failed to register app with DEON network", 500)
-		return
+		return "", err
 	}
 
 	id := uuid.New().String()
 	app.ControllerMgr.clients[id] = cc
 
-	resp := fmt.Sprintf("Client controller ID: %v\n", id)
+	return id, nil
+}
+
+type NewControllerRequest struct {
+	AgentType string `json:"agent_type"`
+	Alias string `json:"alias"`
+	AgentUrl string `json:"agent_url"`
+	Name string `json:"name"`
+	Secret string `json:"secret"`
+	Type string `json:"type"`
+}
+
+func (app *Application) NewControllerHandler(w http.ResponseWriter, r *http.Request) {
+
+	var req NewControllerRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Failed to decode new controller request", 500)
+		return
+	}
+
+	var resp string
+
+	if req.AgentType == "client" {
+		id, err := app.newClientController(req)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Failed to create new client controller", 500)
+			return
+		}
+		resp = fmt.Sprintf("Client controller ID: %v\n", id)
+
+	} else if req.AgentType == "admin" {
+		err := app.newAdminController(req)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Failed to create new admin controller", 500)
+			return
+		}
+		resp = fmt.Sprintf("Created admin controller")
+	}
+
 	w.Write([]byte(resp))
 }
 
+// func (app *Application) RegisterLedgerHandler(w http.ResponseWriter, r *http.Request) {
 
-func (app *Application) RegisterLedgerHandler(w http.ResponseWriter, r *http.Request) {
+// 	// retrieve controller manager
+// 	mgr := app.ControllerMgr
 
-	// retrieve controller manager
-	mgr := app.ControllerMgr
+// 	vars := mux.Vars(r)
+// 	id := vars["agent_id"]
 
-	vars := mux.Vars(r)
-	id := vars["agent_id"]
-
-	if id == "1" {
-		_, err := controller.RegisterDidWithLedger(mgr.admin, Seed())
-		if err != nil {
-			fmt.Println(err)
-			http.Error(w, "Failed to register public admin did", 500)
-			return
-		}
-	} else {
-		// get client controller with id
-		client := mgr.clients[id]
-		if client == nil {
-			http.Error(w, "Client controller with give id doesn't exist", 400)
-			return
-		}
-		_, err := controller.RegisterDidWithLedger(client, Seed())
-		if err != nil {
-			fmt.Println(err)
-			http.Error(w, "Failed to register public client did", 500)
-			return
-		}
-	}
-	w.Write([]byte("Registered public DID"))
-}
+// 	if id == "1" {
+// 		_, err := controller.RegisterDidWithLedger(mgr.admin, Seed(), mgr.ledgerUrl)
+// 		if err != nil {
+// 			fmt.Println(err)
+// 			http.Error(w, "Failed to register public admin did", 500)
+// 			return
+// 		}
+// 	} else {
+// 		// get client controller with id
+// 		client := mgr.clients[id]
+// 		if client == nil {
+// 			http.Error(w, "Client controller with give id doesn't exist", 400)
+// 			return
+// 		}
+// 		_, err := controller.RegisterDidWithLedger(client, Seed(), mgr.ledgerUrl)
+// 		if err != nil {
+// 			fmt.Println(err)
+// 			http.Error(w, "Failed to register public client did", 500)
+// 			return
+// 		}
+// 	}
+// 	w.Write([]byte("Registered public DID"))
+// }
 
 
 func (app *Application) EstablishConnectionHandler(w http.ResponseWriter, r *http.Request) {

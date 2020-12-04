@@ -48,7 +48,7 @@ func main() {
 	sh := ipfs.NewShell(os.Getenv("IPFS_ENDPOINT"))
 
 	// initialize manager for deon network's aca-py agents
-	mgr, err := web.NewControllerManager()
+	mgr, err := web.NewControllerManager(os.Args[1])
 	if err != nil {
 		fmt.Printf("Failed to start controller manager: %v\n", err)
 		return

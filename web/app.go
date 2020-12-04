@@ -34,11 +34,11 @@ func RequestAndRedirectHandler(w http.ResponseWriter, r *http.Request) {
 
 func getProxyPath(proxyUrl string, r *http.Request) string {
 
-	if proxyUrl == os.Getenv("CLIENT_ACAPY_AGENT_URL") {
+	if proxyUrl == os.Getenv("CLIENT_AGENT_URL") {
 		return strings.TrimPrefix(r.URL.Path, "/api/v1/client")
 
-	} else if proxyUrl == os.Getenv("CI_MSP_ACAPY_AGENT_URL") {
-		return strings.TrimPrefix(r.URL.Path, "/api/v1/ci-msp")
+	} else if proxyUrl == os.Getenv("ADMIN_AGENT_URL") {
+		return strings.TrimPrefix(r.URL.Path, "/api/v1/admin")
 	}
 
 	return r.URL.Path
@@ -55,11 +55,11 @@ func getProxyUrl(r *http.Request) string {
 
 	} else if strings.HasPrefix(r.URL.Path, "/api/v1/client") {
 		fmt.Println("Redirecting to client ACA-Py agent...")
-		return os.Getenv("CLIENT_ACAPY_AGENT_URL")
+		return os.Getenv("CLIENT_AGENT_URL")
 
 	} else if strings.HasPrefix(r.URL.Path, "/api/v1/ci-msp") {
-		fmt.Println("Redirecting to CI/MSP ACA-Py agent...")
-		return os.Getenv("CI_MSP_ACAPY_AGENT_URL")
+		fmt.Println("Redirecting to ADMIN ACA-Py agent...")
+		return os.Getenv("ADMIN_AGENT_URL")
 
 	} else {
 		log.Fatalf("Failed to match path: %v\n", r.URL.Path)
@@ -96,7 +96,7 @@ func Serve(app *Application) {
 	// identity management endpoints
 	api.HandleFunc("/admin/agent", app.NewControllerHandler).Methods("POST")
 	api.HandleFunc("/admin/agent/{agent_id}/connect", app.EstablishConnectionHandler).Methods("POST")
-	api.HandleFunc("/admin/agent/{agent_id}/register-ledger", app.RegisterLedgerHandler).Methods("POST")
+	// api.HandleFunc("/admin/agent/{agent_id}/register-ledger", app.RegisterLedgerHandler).Methods("POST")
 	api.HandleFunc("/admin/agent/{agent_id}/issue-credential", app.IssueCredentialHandler).Methods("POST")
 
 	// api.HandleFunc("/", HomeHandler)
