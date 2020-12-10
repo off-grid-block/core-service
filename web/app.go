@@ -28,6 +28,9 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 // Proxy handler to redirect requests
 func RequestAndRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	proxyUrl := getProxyUrl(r)
+	if len(proxyUrl) == 0 {
+		return
+	}
 	proxyPath := getProxyPath(proxyUrl, r)
 	serveRedirect(proxyUrl, proxyPath, w, r)
 }
@@ -49,6 +52,10 @@ func getProxyUrl(r *http.Request) string {
 
 	fmt.Println("Path: " + r.URL.Path)
 
+	// iterate through all the different services (e.g. vote service)
+		// check if the URL path matches the path of any services
+		// check if the service's agent is initialized
+
 	if strings.HasPrefix(r.URL.Path, "/api/v1/vote-app") {
 		fmt.Println("Redirecting to vote service...")
 		return os.Getenv("VOTE_URL")
@@ -62,7 +69,7 @@ func getProxyUrl(r *http.Request) string {
 		return os.Getenv("ADMIN_AGENT_URL")
 
 	} else {
-		log.Fatalf("Failed to match path: %v\n", r.URL.Path)
+		fmt.Println("Failed to match path: %v\n", r.URL.Path)
 		return ""
 	}
 }
@@ -95,6 +102,7 @@ func Serve(app *Application) {
 
 	// identity management endpoints
 	api.HandleFunc("/admin/agent", app.NewControllerHandler).Methods("POST")
+	api.HandleFunc("/admin/agent", app.GetControllerByAliasHandler).Methods("GET").Queries("alias", "{alias}")
 	api.HandleFunc("/admin/agent/{agent_id}/connect", app.EstablishConnectionHandler).Methods("POST")
 	// api.HandleFunc("/admin/agent/{agent_id}/register-ledger", app.RegisterLedgerHandler).Methods("POST")
 	api.HandleFunc("/admin/agent/{agent_id}/issue-credential", app.IssueCredentialHandler).Methods("POST")

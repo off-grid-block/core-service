@@ -8,6 +8,7 @@ import (
 	"github.com/off-grid-block/controller"
 	"github.com/off-grid-block/core-service/blockchain"
 	caMsp "github.com/off-grid-block/fabric-sdk-go/pkg/client/msp"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -21,7 +22,12 @@ type ControllerManager struct {
 	ledgerUrl string
 }
 
-type ClientControllerStore map[string]*controller.ClientController
+type ClientController struct {
+	*controller.ClientController
+	Initialized bool
+}
+
+type ClientControllerStore map[string]*ClientController
 
 // initialize controllers
 func NewControllerManager(ledgerUrl string) (*ControllerManager, error) {
@@ -44,20 +50,20 @@ func Seed() string {
 	return seed[len(seed)-32:]
 }
 
-func (app *Application) newAdminController(req NewControllerRequest) error {
+func (app *Application) newAdminController(req NewControllerRequest) (string, error) {
 	var err error
 	app.ControllerMgr.admin, err = controller.NewAdminController("http://admin.example.com:8021")
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// register admin agent DID with ledger
-	_, err = controller.RegisterDidWithLedger(app.ControllerMgr.admin, Seed(), app.ControllerMgr.ledgerUrl)
+	did, err := controller.RegisterDidWithLedger(app.ControllerMgr.admin, Seed(), app.ControllerMgr.ledgerUrl)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return did, nil
 }
 
 func (app *Application) newClientController(req NewControllerRequest) (string, error) {
@@ -95,7 +101,8 @@ func (app *Application) newClientController(req NewControllerRequest) (string, e
 	}
 
 	id := uuid.New().String()
-	app.ControllerMgr.clients[id] = cc
+
+	app.ControllerMgr.clients[id] = &ClientController{cc, false}
 
 	return id, nil
 }
@@ -115,7 +122,7 @@ func (app *Application) NewControllerHandler(w http.ResponseWriter, r *http.Requ
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "Failed to decode new controller request", 500)
+		http.Error(w, "New controller request body badly formed", 400)
 		return
 	}
 
@@ -128,18 +135,49 @@ func (app *Application) NewControllerHandler(w http.ResponseWriter, r *http.Requ
 			http.Error(w, "Failed to create new client controller", 500)
 			return
 		}
+		log.Printf("Agent initialized\n")
 		resp = fmt.Sprintf("Client controller ID: %v\n", id)
 
 	} else if req.AgentType == "admin" {
-		err := app.newAdminController(req)
+		did, err := app.newAdminController(req)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(w, "Failed to create new admin controller", 500)
 			return
 		}
+		log.Printf("Agent initialized with DID: %v\n", did)
 		resp = fmt.Sprintf("Created admin controller")
 	}
 
+	w.Write([]byte(resp))
+}
+
+
+
+func (app *Application) GetControllerByAliasHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	alias := vars["alias"]
+
+	type Response struct {
+		Initialized bool `json:"initialized"`
+	}
+
+	for _, client := range app.ControllerMgr.clients {
+		if client.Alias() == alias {
+
+			body := Response{Initialized: client.Initialized}
+			resp, err := json.Marshal(body)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			w.Write([]byte(resp))
+			return
+		}
+	}
+
+	// if no client found
+	resp, _ := json.Marshal(false)
 	w.Write([]byte(resp))
 }
 
@@ -183,7 +221,11 @@ func (app *Application) EstablishConnectionHandler(w http.ResponseWriter, r *htt
 
 	vars := mux.Vars(r)
 	id := vars["agent_id"]
-	client := mgr.clients[id]
+	client, found := mgr.clients[id]
+	if !found {
+		http.Error(w, "Client agent not found", 400)
+		return
+	}
 
 	invitation, err := controller.CreateInvitation(mgr.admin)
 	if err != nil {
@@ -229,7 +271,14 @@ func (app *Application) IssueCredentialHandler(w http.ResponseWriter, r *http.Re
 
 	mgr := app.ControllerMgr
 
-	schemaID, err := mgr.admin.RegisterSchema("schema")
+	vars := mux.Vars(r)
+	id := vars["agent_id"]
+	client, found := mgr.clients[id]
+	if !found {
+		http.Error(w, "Client agent not found", 400)
+		return
+	}
+	schemaID, err := mgr.admin.RegisterSchema("deon_schema")
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Unable to register schema", 500)
@@ -243,6 +292,7 @@ func (app *Application) IssueCredentialHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	// get app_name and app_id from request body
 	var req IssueCredentialRequest
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -250,15 +300,17 @@ func (app *Application) IssueCredentialHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	fmt.Printf("app name: %v\n", req.AppName)
-	fmt.Printf("app id:   %v\n", req.AppID)
+	log.Printf("app name: %v\n", req.AppName)
+	log.Printf("app id:   %v\n", req.AppID)
 
-	err = mgr.admin.IssueCredential(req.AppName, req.AppID)
+	credExID, err := mgr.admin.IssueCredential(req.AppName, req.AppID)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Unable to issue credential", 500)
 		return
 	}
+	log.Printf("Credential Issued with ID: %v\n", credExID)
 
+	client.Initialized = true
 	w.Write([]byte("Issued credential"))
 }
