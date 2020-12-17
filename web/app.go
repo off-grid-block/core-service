@@ -52,10 +52,6 @@ func getProxyUrl(r *http.Request) string {
 
 	fmt.Println("Path: " + r.URL.Path)
 
-	// iterate through all the different services (e.g. vote service)
-		// check if the URL path matches the path of any services
-		// check if the service's agent is initialized
-
 	if strings.HasPrefix(r.URL.Path, "/api/v1/vote-app") {
 		fmt.Println("Redirecting to vote service...")
 		return os.Getenv("VOTE_URL")

@@ -164,8 +164,8 @@ func (app *Application) GetControllerByAliasHandler(w http.ResponseWriter, r *ht
 	}
 
 	for _, client := range app.ControllerMgr.clients {
-		if client.Alias() == alias {
 
+		if client.Alias() == alias {
 			body := Response{Initialized: client.Initialized}
 			resp, err := json.Marshal(body)
 			if err != nil {
@@ -303,14 +303,22 @@ func (app *Application) IssueCredentialHandler(w http.ResponseWriter, r *http.Re
 	log.Printf("app name: %v\n", req.AppName)
 	log.Printf("app id:   %v\n", req.AppID)
 
-	credExID, err := mgr.admin.IssueCredential(req.AppName, req.AppID)
+	_, err = mgr.admin.IssueCredential(req.AppName, req.AppID)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Unable to issue credential", 500)
 		return
 	}
-	log.Printf("Credential Issued with ID: %v\n", credExID)
 
-	client.Initialized = true
+	time.Sleep(1 * time.Second)
+	credID, err := client.GetCredential()
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Unable to get credential information from client agent", 500)
+		return
+	}
+
+	log.Printf("Credential Issued with ID: %v\n", credID)
+	mgr.clients[id].Initialized = true
 	w.Write([]byte("Issued credential"))
 }
